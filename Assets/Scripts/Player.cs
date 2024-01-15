@@ -66,8 +66,6 @@ public class Player : MonoBehaviour
             moveSpeed = 0;
         }
 
-
-
         UpdateMove();
      
         characterController.Move(moveForce * Time.deltaTime);

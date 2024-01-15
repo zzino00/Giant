@@ -22,14 +22,20 @@ public class RotateMouse : MonoBehaviour
     {
         limitMinX = -50;
         limitMaxX = 50;
+
         limitMinY = Player.transform.eulerAngles.y - 180;
         limitMaxY = Player.transform.eulerAngles.y + 180;
-        Debug.Log("PlayerY:"+Player.transform.rotation.y);
+       
         eulerAnlgleY += mouseX * YSpeed; //  Y축을 기준으로 좌,우로 회전
         eulerAnlgleX -= mouseY * XSpeed;// X축을 기준으로 상,하로 회전
 
         eulerAnlgleX = ClampAngle(eulerAnlgleX, limitMinX, limitMaxX);
         eulerAnlgleY = ClampAngle(eulerAnlgleY, limitMinY, limitMaxY);
+        if(eulerAnlgleY< limitMinY || eulerAnlgleY > limitMaxY)
+        {
+            Debug.Log("Out of Lange");
+            Debug.Log("PlayerY:" + Player.transform.rotation.eulerAngles.y);
+        }
         transform.rotation = Quaternion.Euler(eulerAnlgleX, eulerAnlgleY, 0);
     }
 
@@ -42,9 +48,27 @@ public class RotateMouse : MonoBehaviour
 
     private float ClampAngle(float angle, float min, float max)
     {
-        if (angle < -360) angle += 360; // 360도를 넘어갔을때 넘어간 만큼만 회전하게
-        if (angle > 360)  angle -= 360;
 
+        if (angle < -360)
+        {
+            angle += 360;
+            Debug.Log("Over");
+            Debug.Log("PlayerY:" + Player.transform.rotation.eulerAngles.y);
+            Debug.Log("FixedAngle:" + angle);
+            min += 360;
+            max += 360;
+        }
+
+        if (angle > 360)
+        {
+            angle -= 360;
+            Debug.Log("Over");
+            Debug.Log("PlayerY:" + Player.transform.rotation.eulerAngles.y);
+            Debug.Log("FixedAngle:" + angle);
+            min -= 360;
+            max -= 360;
+
+        }
         return Mathf.Clamp(angle, min, max);
     }
 }
