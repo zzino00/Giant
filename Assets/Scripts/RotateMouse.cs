@@ -4,71 +4,47 @@ using UnityEngine;
 
 public class RotateMouse : MonoBehaviour
 {
+    // 카메라회전 속도
     [SerializeField]
-    private float XSpeed = 5;
+    private float XSpeed = 5; 
     [SerializeField]
     private float YSpeed = 5;
 
-    public GameObject Player;
+    //회전값과 범위제한
     private float limitMinX; // = -50;
     private float limitMaxX; // = 50;
-    private float limitMinY; // = -180;
-    private float limitMaxY; // = 180;
     private float eulerAnlgleX;
     public float eulerAnlgleY;
-   
+
+    //에임포인터?
+    public GameObject AimPoint;
+
+    //플레이어의  카메라위치에 카메라 고정을 위해서
+    public GameObject Player;
+
 
     public void UpdateRotate(float mouseX, float mouseY)
     {
         limitMinX = -50;
         limitMaxX = 50;
-
-        limitMinY = Player.transform.eulerAngles.y - 180;
-        limitMaxY = Player.transform.eulerAngles.y + 180;
        
         eulerAnlgleY += mouseX * YSpeed; //  Y축을 기준으로 좌,우로 회전
-        eulerAnlgleX -= mouseY * XSpeed;// X축을 기준으로 상,하로 회전
+        eulerAnlgleX -= mouseY * XSpeed;// X축을 기준으로 상,하로 회전 -로 해줘야 안뒤집힘
 
-        eulerAnlgleX = ClampAngle(eulerAnlgleX, limitMinX, limitMaxX);
-        eulerAnlgleY = ClampAngle(eulerAnlgleY, limitMinY, limitMaxY);
-        if(eulerAnlgleY< limitMinY || eulerAnlgleY > limitMaxY)
-        {
-            Debug.Log("Out of Lange");
-            Debug.Log("PlayerY:" + Player.transform.rotation.eulerAngles.y);
-        }
+       eulerAnlgleX = Mathf.Clamp(eulerAnlgleX, limitMinX, limitMaxX);
+       
         transform.rotation = Quaternion.Euler(eulerAnlgleX, eulerAnlgleY, 0);
     }
 
+    [SerializeField]
+    private Vector3 CameraOffset; // 카메라 세부위치 조정
     private void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X");
+        // MouseX,Y값 받아오기
+        float mouseX = Input.GetAxis("Mouse X"); 
         float mouseY = Input.GetAxis("Mouse Y");
+         //transform.position =new Vector3(transform.position.x, Player.GetComponent<Player>().cameraTr.position.y, Player.GetComponent<Player>().cameraTr.position.z)+ CameraOffset; // 플레이어의 cameraTr에 카메라 고정
+        transform.position = Player.GetComponent<Player>().cameraTr.position + CameraOffset; // 플레이어의 cameraTr에 카메라 고정
         UpdateRotate(mouseX, mouseY);
-    }
-
-    private float ClampAngle(float angle, float min, float max)
-    {
-
-        if (angle < -360)
-        {
-            angle += 360;
-            Debug.Log("Over");
-            Debug.Log("PlayerY:" + Player.transform.rotation.eulerAngles.y);
-            Debug.Log("FixedAngle:" + angle);
-            min += 360;
-            max += 360;
-        }
-
-        if (angle > 360)
-        {
-            angle -= 360;
-            Debug.Log("Over");
-            Debug.Log("PlayerY:" + Player.transform.rotation.eulerAngles.y);
-            Debug.Log("FixedAngle:" + angle);
-            min -= 360;
-            max -= 360;
-
-        }
-        return Mathf.Clamp(angle, min, max);
     }
 }
