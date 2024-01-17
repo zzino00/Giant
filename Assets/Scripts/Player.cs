@@ -11,9 +11,15 @@ public class Player : MonoBehaviour
     {
         Idle,
         Walk,
-        Run
+        Run,
+        Fire,
     }
 
+    enum PersState
+    {
+        First,
+        Third,
+    }
     //이동속도
     [SerializeField]
     private float moveSpeed = 10.0f;
@@ -44,7 +50,7 @@ public class Player : MonoBehaviour
 
     //플레이어 상태를 나눌 Enum
     State PlayerState;
-
+    
     
 
 
@@ -90,8 +96,6 @@ public class Player : MonoBehaviour
         axisX = Input.GetAxisRaw("Horizontal");
         axisZ = Input.GetAxisRaw("Vertical");
 
-
-
         if (Input.GetKey(KeyCode.LeftShift)) // 쉬프트키를 누르고있는 동안 달림
         {
             PlayerState = State.Run;
@@ -101,10 +105,17 @@ public class Player : MonoBehaviour
         {
             PlayerState = State.Walk;
         }
-        if (axisX == 0 && axisZ == 0)// x,z인풋이 없으면 Idle상태
+        if (axisX==0&&axisZ==0)// x,z인풋이 없으면 Idle상태
         {
             PlayerState = State.Idle;
-           
+           //PlayerState = State.Run;
+
+        }
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            PlayerState= State.Fire;
+           // Debug.Log("Shoot");
         }
 
       
@@ -116,30 +127,80 @@ public class Player : MonoBehaviour
     Vector3 IdleWeaponPos = new Vector3(0, (float)-0.01, (float)0.01);
     Vector3 IdleWeaponRot = new Vector3((float)65.3, (float)26.7,(float)219.7);
 
+
+    Vector3 RunWeaponPos = new Vector3(0, (float)-0.01, (float)0.01);
+    Vector3 RunWeaponRot = new Vector3((float)65.3, (float)-43.7, (float)168.5);
+
+    Vector3 RunCameraPos =new Vector3(0, (float)0, (float)-0.08);
+
+    Vector3 FireWeaponPos = new Vector3(0, (float)-0.01, (float)0.01);
+    Vector3 FireWeaponRot = new Vector3((float)65.3, (float)-43.7, (float)168.5);
+    Vector3 FireCameraPos = new Vector3((float)-0.2, (float)0.15, (float)0.3);
+
+
+
     void Update()
     {
 
         UpdateMove();
-        switch (PlayerState)
-        {
-            case State.Idle:
-                moveSpeed = 0;
-                weapon.WeaponPosOffset = IdleWeaponPos;
-                weapon.WeaponRotOffset = IdleWeaponRot;
-                break;
+      
+            switch (PlayerState)
+            {
+                case State.Idle:
+                    moveSpeed = 0;
+                    weapon.WeaponPosOffset = IdleWeaponPos;
+                    weapon.WeaponRotOffset = IdleWeaponRot;
+                    rotateMouse.CameraOffset = new Vector3(0, 0, 0);
+                    Camera.main.nearClipPlane = 0.1f;
+                    animator.SetBool("Fire", false);
+                    break;
 
-            case State.Walk:
-                moveSpeed = 3;
-                weapon.WeaponPosOffset = WalkWeaponPos;
-                weapon.WeaponRotOffset = WalkWeaponRot;
-                Debug.Log("Walk");
-                break;
+                case State.Walk:
+                    moveSpeed = 3;
+                    weapon.WeaponPosOffset = WalkWeaponPos;
+                    weapon.WeaponRotOffset = WalkWeaponRot;
+                    rotateMouse.CameraOffset = new Vector3(0, 0, 0);
+                    Camera.main.nearClipPlane = 0.1f;
+                    animator.SetBool("Fire", false);
+                    break;
 
-            case State.Run:
-                moveSpeed = 10;
-                break;
-        }
+                case State.Run:
+                    moveSpeed = 10;
+                    weapon.WeaponPosOffset = RunWeaponPos;
+                    weapon.WeaponRotOffset = RunWeaponRot;
+                    rotateMouse.CameraOffset = RunCameraPos;
+                    Camera.main.nearClipPlane = 0.2f;
+
+                    animator.SetBool("Fire", false);
+                    break;
+
+                case State.Fire:
+                    animator.SetBool("Fire", true);
+
+                    weapon.WeaponPosOffset = RunWeaponPos;
+                    weapon.WeaponRotOffset = RunWeaponRot;
+                    rotateMouse.CameraOffset = FireCameraPos;
+                    Camera.main.nearClipPlane = 0.01f;
+
+                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                     Debug.DrawRay(Camera.main.transform.position, ray.direction * 100.0f, Color.red, 1.0f);
+
+                RaycastHit hit;
+                if(Physics.Raycast(ray, out hit,100.0f))
+                {
+                    Debug.Log($"Hit @{hit.collider.gameObject.name}");
+                }
+
+                    break;
+
+            }
     }
+       
+        
+       
+    
+
+   
 
     void Move_BoneRotation()
     {
@@ -152,8 +213,11 @@ public class Player : MonoBehaviour
 
     private void LateUpdate()
     {
-
-        Move_BoneRotation();
+        if(PlayerState !=State.Run)
+        {
+            Move_BoneRotation();
+        }
+       
 
         MoveTo(new Vector3(axisX, 0, axisZ)); // 플레이어가 하늘을 보고 움직일때 공중에 뜨는것을 막기위해  y =0 으로 세팅
 
