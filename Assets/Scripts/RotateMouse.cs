@@ -19,9 +19,6 @@ public class RotateMouse : MonoBehaviour
     private float eulerAnlgleX;
     public float eulerAnlgleY;
 
-    //에임포인터?
-    public GameObject AimPoint;
-
     //플레이어의  카메라위치에 카메라 고정을 위해서
     public GameObject Player;
 

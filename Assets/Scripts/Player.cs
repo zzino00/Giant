@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
 
 
 [RequireComponent(typeof(CharacterController))] // 플레이어 스크립트를 컴포넌트로 적용할시 자동으로 CharacterController컴포넌트도 적용됨
@@ -30,7 +32,7 @@ public class Player : UnitBase
     private Vector3 moveForce;
 
     [SerializeField]
-    float myMaxHp = 100;
+    public float myMaxHp = 100;
 
 
 
@@ -44,7 +46,7 @@ public class Player : UnitBase
     public Animator animator;
 
     public GameObject weaponPoint;
-    private Weapon weapon;
+    public Weapon weapon;
     //플레이이어 상체움직임을위한 변수
     private Transform playerChestTr;
     Vector3 chestDir = new Vector3();
@@ -59,6 +61,8 @@ public class Player : UnitBase
     State playerState;
 
     public float playerSize;
+
+    bool isSingleShot;
 
     // 플레이어 오프셋
     Vector3 walkWeaponPos = new Vector3(0, (float)-0.01, (float)0.01);
@@ -105,7 +109,8 @@ public class Player : UnitBase
             cameraTr = animator.GetBoneTransform(HumanBodyBones.Head);
             weaponTr = animator.GetBoneTransform(HumanBodyBones.RightHand);
         }
-
+        isSingleShot = true;
+        isCanSingleShoot = true;
         playerSize = transform.lossyScale.y;
         base.Init();
     }
@@ -130,7 +135,7 @@ public class Player : UnitBase
         
     }
 
-
+    bool isCanSingleShoot;
    
     private void UpdateMove()
     {
@@ -163,6 +168,7 @@ public class Player : UnitBase
             }
             else
             {
+               
                 playerState = State.Fire;
             }
           
@@ -175,6 +181,16 @@ public class Player : UnitBase
             //그렇다고 모션을그대로 넣고 장전을 하게 해주자니 장전애니메이션이 의미가 없음 2초를 기다리는게 아니라 애니메이션 이벤트로 장전을 해야하나 생각중
             // bool로 트리거를 주거나 아니면 총쏠때만 체크
             playerState = State.Reload;
+        }
+
+        if(Input.GetKeyDown(KeyCode.V))
+        {
+            isSingleShot = !isSingleShot;
+        }
+
+        if(Input.GetMouseButtonUp(0))
+        {
+            isCanSingleShoot = true;
         }
 
     }
@@ -207,9 +223,25 @@ public class Player : UnitBase
                     break;
 
                 case State.Fire:
-
-               
-                    weapon.Fire();
+              
+               if(isSingleShot)
+                {
+                   
+                    if(isCanSingleShoot)
+                    {
+                        Debug.Log("SingleShot");
+                        weapon.Fire();
+                        isCanSingleShoot = false;
+                    }
+                }
+                   
+                    
+                else
+                {
+                    Debug.Log("SerialShot");
+                    weapon.Fire(weapon.gun.fireRate);
+                }
+                    
                     SetOffset(fireWeaponRot, fireWeaponPos, fireCameraPos, 0.01f,true);
                   
                     break;
@@ -243,8 +275,22 @@ public class Player : UnitBase
        // Debug.Log("Reload");
 
     }
+    public override void GetDamage(float damage)
+    {
+        base.GetDamage(damage);
+        if(curHp<=0)
+        {
+            GameManager.MoveToGameOver();
+        }
+    }
 
-    private void OnTriggerEnter(Collider other)
+    protected override bool IsSmaller(GameObject target)
+    {
+        float targetSize = target.transform.lossyScale.y;
+        return targetSize >= mySize;
+    }
+
+        private void OnTriggerEnter(Collider other)
     {
         if(other.tag == "Gear")
         {
@@ -256,12 +302,15 @@ public class Player : UnitBase
         {
             targetSize = other.transform.lossyScale.y;
             base.mySize = transform.lossyScale.y;
-            Debug.Log(IsSmaller());
+            if(IsSmaller(other.gameObject))
+            {
+                GameManager.MoveToGameOver();
+            }
         }
 
         if(other.tag == "EnemyBullet")
         {
-            base.GetDamage(2);
+            GetDamage(2);
         }
     }
 
