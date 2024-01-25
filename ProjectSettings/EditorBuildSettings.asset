@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Clear.unity
     guid: 87960b1f27ef2894388fac3825324a32
+  - enabled: 1
+    path: Assets/Scenes/Practice.unity
+    guid: 99d24d74a4efc1e4ba753555436c42c6
   m_configObjects: {}
