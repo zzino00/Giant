@@ -1,10 +1,5 @@
-using JetBrains.Annotations;
-using System.Collections;
-using System.Collections.Generic;
-using TreeEditor;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Pool;
 
 [RequireComponent(typeof(NavMeshAgent))] // 이 스크립트가 추가되면 자동으로 NavMeshAgent컴포넌트도 추가됨
 public class Enemy : UnitBase
@@ -54,7 +49,7 @@ public class Enemy : UnitBase
     public Player player;
     EnemyState enemyState;
     PoolAble poolAble;
-
+    public bool isMove = false;
     enum EnemyState
     {
         Move,
@@ -153,7 +148,7 @@ public class Enemy : UnitBase
 
     }
 
-   
+  
     private void Update() //FSM
     {
         gearDropPos = new Vector3(transform.position.x, 2, transform.position.z); // 부품아이템을 떨어뜨리는 위치
@@ -162,32 +157,36 @@ public class Enemy : UnitBase
         switch (enemyState)
         {
             case EnemyState.Move:
-
-                
                 nav.speed = moveSpeed;
-                nav.isStopped = false; 
                 anim.SetBool("isShoot", false);
+                Debug.Log(isMove);
                 isChase = !IsSmaller(player.gameObject);// 상대가 나보다 작을때
-               
-                if (isChase|| curDistance>maxRangeAtkDis) // 상대가 나보다 작거나 최대범위 밖일때 추격
-                    ChaseTarget();
-                else RunAway();// 아니면 도망감
+               if(isMove)
+                {
+                    nav.isStopped = false;
+                    if (isChase || curDistance > maxRangeAtkDis) // 상대가 나보다 작거나 최대범위 밖일때 추격
+                        ChaseTarget();
+                    else RunAway();// 아니면 도망감
+                }
+             
                 break;
 
             case EnemyState.Fire:
 
-                if (curDistance < minRangeAtkDis )// 사격범위보다 가까우면 이동
+                if (isMove)
                 {
-                    
-                    enemyState = EnemyState.Move;
+                    if (curDistance < minRangeAtkDis)// 사격범위보다 가까우면 이동
+                    {
+
+                        enemyState = EnemyState.Move;
+                    }
+                    else// 아니면 공격
+                    {
+                        nav.isStopped = true;
+                        RangeAttack();
+
+                    }
                 }
-                else// 아니면 공격
-                {
-                    nav.isStopped = true;
-                    RangeAttack();
-                   
-                }
-               
                 break;
         }
 
@@ -237,19 +236,30 @@ public class Enemy : UnitBase
    
     private void OnTriggerEnter(Collider other)// 플레이어보다 크기 작은 상황에서 플레이어와 충돌하면 바로 사망
     {
-        if (other.tag != "Player")
-            return;
-
-       // base.mySize = transform.lossyScale.y;
-        bool isSmaller = IsSmaller(player.gameObject);
-        if (isSmaller)
+       
+        if (other.tag == "Player")
         {
-            SoundManager.instance.PlayDestroyAudioSource(SoundManager.instance.destroyClip);
-            poolAble.ReleaseObject();
-           // gameObject.SetActive(false);
-            GameManager.AddKillCount();
-            
+            Debug.Log("isTriggered Player");
+            // base.mySize = transform.lossyScale.y;
+            bool isSmaller = IsSmaller(player.gameObject);
+            if (isSmaller)
+            {
+               
+                SoundManager.instance.PlayDestroyAudioSource(SoundManager.instance.destroyClip);
+                poolAble.ReleaseObject();
+                // gameObject.SetActive(false);
+                GameManager.AddKillCount();
+
+            }
         }
 
+
+        if(other.tag == "Spawner")
+        {
+            Debug.Log("isTriggerd Spawner");
+            GetComponent<NavMeshAgent>().enabled = true;
+            isMove = true;
+           
+        }
     }
 }

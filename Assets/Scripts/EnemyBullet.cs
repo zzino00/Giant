@@ -15,10 +15,7 @@ public class EnemyBullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Bullet Released");
-
-
-        if (other.tag == "Enemy")
+            if (other.tag == "Enemy")
             return;
 
         rb.velocity = Vector3.zero;

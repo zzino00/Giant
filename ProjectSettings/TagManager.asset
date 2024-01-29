@@ -9,6 +9,7 @@ TagManager:
   - Gear
   - EnemyBullet
   - Enemy
+  - Spawner
   layers:
   - Default
   - TransparentFX

@@ -26,7 +26,8 @@ public class StageData
     public List<Stage> stages = new List<Stage>(); // 이름을 Json파일의 리스트랑 맞추는게 중요
 
 
-    //public Dictionary<int, Stage> MakeDic() // 지금은 단순히 스테이지 단계별로 변수를 받아오면 되는 것이기 때문에 List로 충분하지만 나중에 ID를 활용해서 찾게 된다면 Dictionary를 쓸것
+    //public Dictionary<int, Stage> MakeDic()
+    // 지금은 단순히 스테이지 단계별로 변수를 받아오면 되는 것이기 때문에 List로 충분하지만 나중에 ID를 활용해서 찾게 된다면 Dictionary를 쓸것
     //{
 
     //    Dictionary<int, Stage> dict = new Dictionary<int, Stage>();
@@ -35,7 +36,7 @@ public class StageData
     //        dict.Add(stage.level, stage);
     //    }
     //    return dict;
-    //}
+    //} 
 
 
 }

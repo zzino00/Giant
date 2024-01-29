@@ -42,7 +42,7 @@ public class Player : UnitBase
 
     //사용할 컨포넌트들
     private RotateMouse rotateMouse;
-    private CharacterController characterController;
+    public CharacterController characterController;
     public Animator animator;
 
     public GameObject weaponPoint;

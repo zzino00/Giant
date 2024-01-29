@@ -10,13 +10,17 @@ public class GameManager : MonoBehaviour
     public static int ClearCount = 0;
     public static int KillCount;
     public static int stageLevel = 0;
-    public  GameObject Spawner;
+    public static int lastLevel = 2;
+    public GameObject Spawner;
     public static EnemySpawner enemySpawner;
+    public GameObject playerGO;
+    public GameObject playerSpawnPoint;
+
     public static void AddKillCount()
     {
         KillCount++;
         enemySpawner.curEnemyCount--;
-        if(stageLevel == 1 && CheckClearCount())
+        if(stageLevel == lastLevel && CheckClearCount())
         {
             MoveToClear();
         }
@@ -44,7 +48,7 @@ public class GameManager : MonoBehaviour
 
     public static void ResetSetting()
     {
-       
+     
         KillCount = 0;
         ClearCount = DataManager.instance.data.stages[stageLevel].clearNum;
         enemySpawner.spawnRate = DataManager.instance.data.stages[stageLevel].spawnRate;
@@ -67,10 +71,17 @@ public class GameManager : MonoBehaviour
     {
         if(CheckClearCount())
         {
-            if(0<=stageLevel&&stageLevel<1)
+            if(0<=stageLevel&&stageLevel< lastLevel)
             {
+                Player player = playerGO.GetComponent<Player>();
+                // player.characterController.Move(playerSpawnPoint.transform.position);
+                playerGO.transform.position = playerSpawnPoint.transform.position;
+                Debug.Log("SpawnPos"+playerSpawnPoint.transform.position);
+                Debug.Log("PlayerPos" + playerGO.transform.position);
+
                 enemyArr = GameObject.FindGameObjectsWithTag("Enemy");
                 bulletArr = GameObject.FindGameObjectsWithTag("EnemyBullet");
+                
                 for (int i=0; i<enemyArr.Length; i++)
                 {
                     PoolManager.instance.ReturnToPool(enemyArr[i]);
@@ -93,7 +104,11 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    
+        if(Input.GetKey(KeyCode.Alpha0))
+        {
+            Debug.Log("DebugKey");
+            playerGO.transform.position = playerSpawnPoint.transform.position;
+        }
         MoveToNextLevel();
 
     }

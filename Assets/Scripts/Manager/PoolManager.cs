@@ -52,9 +52,9 @@ public class PoolManager : MonoBehaviour
             rootGO.name = objectInfos[i].objectName+"Root";
             IObjectPool<GameObject> pool = new ObjectPool<GameObject>
             (CreatePooledGo, TakeFromPool, ReturnToPool, DestroyPoolObject, true, objectInfos[i].count, objectInfos[i].count); //delegate generic 함수들을 매개변수로 받는 생성자, 
-                                                                                                                               // 첫번째 매개변수를 제외하면 나머지는 반환값이 없는 generic함수를 매개변수로 받기                          
+                                                                                                                               // 첫번째 매개변수를 제외하면 나머지는 반환값이없는
+                                                                                                                               // generic함수를 매개변수로 받기                          
                                                                                                                                // 때문에 Action으로 받는다.
-
             if (poolGoDic.ContainsKey(objectInfos[i].objectName))//이미 풀이 생성되어 있다면
             {
                 Debug.LogFormat("{0} 이미 등록된 오브젝트 입니다.", objectInfos[i].objectName);
@@ -71,9 +71,6 @@ public class PoolManager : MonoBehaviour
                 poolAbleGo.Pool.Release(poolAbleGo.gameObject);// 풀에 넣기
             }
         }
-
-       
-
         Debug.Log("오브젝트풀링 준비 완료");
         IsReady = true;
     }
@@ -100,11 +97,6 @@ public class PoolManager : MonoBehaviour
         Destroy(poolGo);
     }
 
-    //public void ReturnAllEnemyToPool()
-    //{
-    //    poolGoDic.
-    //}
-
 
     public GameObject GetGoDic(string goName)
     {
@@ -115,7 +107,7 @@ public class PoolManager : MonoBehaviour
             return null;
         }
 
-        if(goName == "Enemy")
+        if(goName == "Enemy")// enemy activate할때 설정
         {
        
             GameObject enemyGo = objectPoolDic[goName].Get();
@@ -128,10 +120,9 @@ public class PoolManager : MonoBehaviour
             enemy.moveSpeed = DataManager.instance.data.stages[GameManager.stageLevel].enemySpeed;
             enemy.maxHp = DataManager.instance.data.stages[GameManager.stageLevel].maxHp;
             enemy.curHp = enemy.maxHp;
-            enemy.nav = enemyGo.GetComponent<NavMeshAgent>();
+            enemyGo.GetComponent<NavMeshAgent>().enabled = false;
+
           
-          //  enemy.nav.updatePosition = false;
-           // enemy.nav.updateRotation = false;
        
             return enemyGo;
             
